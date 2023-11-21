@@ -1,0 +1,8 @@
+
+placeholder
+obj
+*.o
+*.a
+*.dSYM
+.DS_Store
+.vscode
