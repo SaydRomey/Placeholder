@@ -6,7 +6,7 @@
 /*   By: cdumais <cdumais@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/20 22:08:14 by cdumais           #+#    #+#             */
-/*   Updated: 2023/11/20 22:08:40 by cdumais          ###   ########.fr       */
+/*   Updated: 2023/11/28 10:54:23 by cdumais          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,8 @@ int		main(int argc, char **argv)
 {
 	(void)argc;
 	(void)argv;
-	ft_printf("Hello World!\n");
+	// 
+
+	// ft_printf("Hello World!\n");
 	return (0);
 }
