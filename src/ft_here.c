@@ -1,29 +1,22 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   main.c                                             :+:      :+:    :+:   */
+/*   ft_here.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: cdumais <cdumais@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/11/20 22:08:14 by cdumais           #+#    #+#             */
-/*   Updated: 2023/12/08 22:57:07 by cdumais          ###   ########.fr       */
+/*   Created: 2023/12/08 22:54:50 by cdumais           #+#    #+#             */
+/*   Updated: 2023/12/08 22:56:49 by cdumais          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "placeholder.h"
 
-void	ft_testing(void)
+/*
+for testing purposes
+**(usage: here(__FILE__, __LINE__);*
+*/
+void	ft_here(char *file, int line)
 {
-	ft_here(__FILE__, __LINE__);
-}
-
-int		main(int argc, char **argv)
-{
-	(void)argc;
-	(void)argv;
-	// 
-	ft_testing();
-
-	// 
-	return (0);
+	printf("HERE (%s, l.%d)\n", file, line);
 }
