@@ -1,8 +1,17 @@
 
+# executable
 placeholder
+
 obj
-*.o
-*.a
+tmp
+
 *.dSYM
 .DS_Store
 .vscode
+
+*.o
+*.a
+*.s
+
+*.pdf
+*.init_check
