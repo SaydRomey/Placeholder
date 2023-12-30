@@ -6,7 +6,7 @@
 #    By: cdumais <cdumais@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/06/19 21:05:52 by cdumais           #+#    #+#              #
-#    Updated: 2023/11/21 12:13:52 by cdumais          ###   ########.fr        #
+#    Updated: 2023/12/29 20:19:13 by cdumais          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -21,34 +21,64 @@ INC_DIR		:= inc
 LIB_DIR		:= lib
 OBJ_DIR		:= obj
 SRC_DIR		:= src
-
-LIBFT_DIR	:= $(LIB_DIR)/libft
-LIBFT_INC	:= $(LIBFT_DIR)/$(INC_DIR)
-LIBFT_HDR	:= $(LIBFT_INC)/libft.h
-LIBFT_SRCS	:= $(wildcard $(LIBFT_DIR)/$(SRC_DIR)/*.c)
-LIBFT		:= $(LIBFT_DIR)/libft.a
+TMP_DIR		:= tmp
 
 COMPILE		:= gcc
 C_FLAGS		:= -Wall -Wextra -Werror
+HEADERS		:= -I$(INC_DIR)
 
 REMOVE		:= rm -rf
 NPD			:= --no-print-directory
 VOID		:= /dev/null
+OS			:= $(shell uname -s)
+# **************************************************************************** #
+# ---------------------------------- LIBFT ----------------------------------- #
+# **************************************************************************** #
+LIBFT_DIR	:= $(LIB_DIR)/libft
+LIBFT_INC	:= $(LIBFT_DIR)/$(INC_DIR)
+LIBFT		:= $(LIBFT_DIR)/libft.a
+HEADERS		:= $(HEADERS) -I$(LIBFT_INC)
+# **************************************************************************** #
+# -------------------------------- MINILIBX (variables) ---------------------- #
+# **************************************************************************** #
+# MLX_DIR		:= $(LIB_DIR)/minilibx
 
-HEADERS 	:= -I$(INC_DIR) -I$(LIBFT_INC)
-# LDFLAGS		:= 
-# **************************************************************************** #
-# --------------------------------- C FILES ---------------------------------- #
-# **************************************************************************** #
-# SRC		:=
-# **************************************************************************** #
+# ifeq ($(OS), Linux)
+# 	C_FLAGS	:= $(CFLAGS) -D OS=$(OS) #(check if this works better) ?
+# 	END_SRC := cleanup_linux.c
+# 	MLX_DIR := $(MLX_DIR)/minilibx_linux
+# 	L_FLAGS := -L$(MLX_DIR) -lmlx -lbsd -lXext -lX11 -lm
+# else ifeq ($(OS), Darwin)
+# 	END_SRC := cleanup_mac.c
+# 	MLX_DIR := $(MLX_DIR)/minilibx_macos
+# 	L_FLAGS := -L$(MLX_DIR) -lmlx -framework OpenGL -framework AppKit
+# else
+# 	$(error Unsupported operating system: $(UNAME))
+# endif
 
+# MLX			:= $(MLX_DIR)/libmlx.a
+# HEADERS		:= $(HEADERS) -I$(MLX_DIR)
+# **************************************************************************** #
+# -------------------------------- SUBMODULES  ------------------------------- #
+# **************************************************************************** #
+INIT_CHECK	:= $(LIB_DIR)/.init_check
+INIT		:= $(if $(wildcard $(INIT_CHECK)),,init_submodules)
 # **************************************************************************** #
 # --------------------------------- H FILES ---------------------------------- #
 # **************************************************************************** #
-# INC		:=
+# INC		:= 
+# **************************************************************************** #
+# --------------------------------- C FILES ---------------------------------- #
+# **************************************************************************** #
+# SRC		:=	$(END_SRC)
 # **************************************************************************** #
 # -------------------------------- ALL FILES --------------------------------- #
+# **************************************************************************** #
+# INCS		:=	$(addprefix $(INC_DIR)/, $(addsuffix .h, $(INC)))
+# SRCS		:=	$(addprefix $(SRC_DIR)/, $(addsuffix .c, $(SRC)))
+# OBJS		:=	$(patsubst $(SRC_DIR)/%.c,$(OBJ_DIR)/%.o,$(SRCS))
+# **************************************************************************** #
+# -------------------------------- ALL * FILES ------------------------------- #
 # **************************************************************************** #
 # INCS		:=	$(addprefix $(INC_DIR)/, $(addsuffix .h, $(INC)))
 # SRCS		:=	$(addprefix $(SRC_DIR)/, $(addsuffix .c, $(SRC)))
@@ -62,17 +92,27 @@ OBJS		:=	$(patsubst $(SRC_DIR)/%.c,$(OBJ_DIR)/%.o,$(SRCS))
 # **************************************************************************** #
 # ---------------------------------- RULES ----------------------------------- #
 # **************************************************************************** #
-all: $(NAME)
+all: $(INIT) $(NAME)
 
+# $(NAME): $(LIBFT) $(OBJS) $(INCS) $(MLX)
 $(NAME): $(LIBFT) $(OBJS) $(INCS)
 	@echo "[$(BOLD)$(PURPLE)$(NAME)$(RESET)]\\t$(GREEN)created$(RESET)"
 	@echo "$(GREEN)$$TITLE$(RESET)"
 	@echo "Compiled for $(ITALIC)$(BOLD)$(PURPLE)$(USER)$(RESET) \
 		$(CYAN)$(TIME)$(RESET)\n"
 	@$(COMPILE) $(C_FLAGS) $(HEADERS) $(OBJS) $(LIBFT) -o $@
+# @$(COMPILE) $(C_FLAGS) $(HEADERS) $(OBJS) $(LIBFT) $(L_FLAGS) -o $@
 
-$(LIBFT): $(LIBFT_SRCS) $(LIBFT_HDR)
-	@make -C $(LIBFT_DIR) $(NPD)
+$(LIBFT):
+	@$(MAKE) -C $(LIBFT_DIR) $(NPD)
+
+# $(MLX):
+# 	@echo "Building minilibx in $(CYAN)$(UNDERLINE)$(MLX_DIR)$(RESET)..."
+# 	@$(MAKE) -C $(MLX_DIR) > $(VOID) 2>&1 || \
+# 		(echo "Failed to build minilibx in $(MLX_DIR)" && exit 1)
+# 	@printf "$(UP)$(ERASE_LINE)"
+# 	@echo "[$(BOLD)$(PURPLE)minilibx$(RESET)] \
+# 	$(GREEN)\tbuilt successfully$(RESET)"
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c $(INCS) | $(OBJ_DIR)
 	@echo "$(CYAN)Compiling...$(ORANGE)\t$(notdir $<)$(RESET)"
@@ -82,6 +122,7 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c $(INCS) | $(OBJ_DIR)
 $(OBJ_DIR):
 	@mkdir -p $(OBJ_DIR)
 
+# @if [ -d "$(OBJ_DIR)" ]; then
 clean:
 	@if [ -n "$(wildcard $(OBJ_DIR))" ]; then \
 		$(REMOVE) $(OBJ_DIR); \
@@ -91,7 +132,7 @@ clean:
 		echo "[$(BOLD)$(PURPLE)$(NAME)$(RESET)] \
 		$(YELLOW)No object files to remove$(RESET)"; \
 	fi
-	@make clean -C $(LIBFT_DIR) $(NPD)
+	@$(MAKE) clean -C $(LIBFT_DIR) $(NPD)
 
 fclean: clean
 	@if [ -n "$(wildcard $(NAME))" ]; then \
@@ -115,14 +156,45 @@ re: fclean all
 
 .PHONY: all clean fclean re
 # **************************************************************************** #
-# ---------------------------------- UTILS ----------------------------------- #
+# -------------------------------- MINILIBX ---------------------------------- #
 # **************************************************************************** #
-run: all
-	@./$(NAME) $(ARGS)
+# mlxclean:
+# 	@if [ -f $(MLX) ]; then \
+# 		make clean -C $(MLX_DIR) > $(VOID) 2>&1 || (echo "mlx clean error" \
+# 			&& exit 1); \
+# 		echo "[$(BOLD)$(PURPLE)minilibx$(RESET)] \
+# 		$(GREEN)Library removed$(RESET)"; \
+# 	else \
+# 		echo "[$(BOLD)$(PURPLE)minilibx$(RESET)] \
+# 		$(YELLOW)No library to remove$(RESET)"; \
+# 	fi
 
-debug: C_FLAGS += -g
-debug: re
-# @./$(NAME)
+# .PHONY: mlxclean
+# **************************************************************************** #
+# ----------------------------------- GIT ------------------------------------ #
+# **************************************************************************** #
+init_submodules: $(INIT_CHECK)
+
+$(INIT_CHECK):
+	@git submodule update --init --recursive
+	@touch $@
+
+# ifeq ($(OS), Linux)
+# 	@chmod +x $(MLX_DIR)/configure
+# endif
+
+update:
+	@echo "Are you sure you want to update the repo and submodules? [y/N] " \
+	&& read ANSWER; \
+	if [ "$$ANSWER" = "y" ] || [ "$$ANSWER" = "Y" ]; then \
+		git pull origin main; \
+		$(MAKE) init_submodules; \
+		echo "Repository and submodules updated."; \
+	else \
+		echo "canceling update..."; \
+	fi
+
+.PHONY: init_submodules update
 # **************************************************************************** #
 # ---------------------------------- NORME ----------------------------------- #
 # **************************************************************************** #
@@ -131,7 +203,7 @@ norm:
 		echo "$(BOLD)$(YELLOW)Norminetting $(PURPLE)$(NAME)$(RESET)"; \
 		norminette -o $(INCS); \
 		norminette -o $(SRCS); \
-		make norm -C $(LIBFT_DIR); \
+		$(MAKE) norm -C $(LIBFT_DIR); \
 	else \
 		echo "$(BOLD)$(YELLOW)Norminette not installed$(RESET)"; \
 	fi
@@ -141,43 +213,42 @@ nm: $(NAME)
 	@nm $(NAME) | grep U | grep -v 'ft_' \
 				| sed 's/U//g' | sed 's/__//g' | sed 's/ //g' \
 				| sort | uniq
-	@make nm -C $(LIBFT_DIR) $(NPD)
+	@$(MAKE) nm -C $(LIBFT_DIR) $(NPD)
 
 .PHONY: norm nm
 # **************************************************************************** #
-# ---------------------------------- BACKUP ---------------------------------- #
+# ---------------------------------- PDF ------------------------------------- #
 # **************************************************************************** #
-USER		:=$(shell whoami)
-ROOT_DIR	:=$(notdir $(shell pwd))
-TIMESTAMP	:=$(shell date "+%Y%m%d_%H%M%S")
-BACKUP_NAME	:=$(ROOT_DIR)_$(USER)_$(TIMESTAMP).zip
-MOVE_TO		:= ~/Desktop/$(BACKUP_NAME)
+PDF		:= cub3d_en.pdf
+GIT_URL	:= https://github.com/SaydRomey/42_ressources
+PDF_URL	= $(GIT_URL)/blob/main/pdf/$(PDF)?raw=true
 
-backup: ffclean
-	@if which zip > $(VOID); then \
-		zip -r --quiet $(BACKUP_NAME) ./*; \
-		mv $(BACKUP_NAME) $(MOVE_TO); \
-		echo "[$(BOLD)$(PURPLE)$(NAME)$(RESET)] \
-		compressed as: $(CYAN)$(UNDERLINE)$(MOVE_TO)$(RESET)"; \
-	else \
-		echo "Please install zip to use the backup feature"; \
-	fi
+pdf: | $(TMP_DIR)
+	@curl -# -L $(PDF_URL) -o $(TMP_DIR)/$(PDF)
+ifeq ($(OS),Darwin)
+	@open $(TMP_DIR)/$(PDF)
+else
+	@xdg-open $(TMP_DIR)/$(PDF) || echo "Please install a compatible PDF viewer"
+endif
 
-.PHONY: backup
+.PHONY: pdf
 # **************************************************************************** #
 # -------------------------------- LEAKS ------------------------------------- #
 # **************************************************************************** #
 VAL_CHECK	:= $(shell which valgrind > $(VOID); echo $$?)
 
 # valgrind options
-VAL_LOG		:= valgrind-out.txt
 ORIGIN		:= --track-origins=yes
 LEAK_CHECK	:= --leak-check=full
 LEAK_KIND	:= --show-leak-kinds=all
+
+# valgrind additional options
 CHILDREN	:= --trace-children=yes
 FD_TRACK	:= --track-fds=yes
+HELGRIND	:= --tool=helgrind
 NO_REACH	:= --show-reachable=no
 VERBOSE		:= --verbose
+VAL_LOG		:= valgrind-out.txt
 LOG_FILE	:= --log-file=$(VAL_LOG)
 
 # suppression-related options
@@ -186,13 +257,13 @@ SUPP_GEN	:= --gen-suppressions=all
 SUPPRESS	:= --suppressions=$(SUPP_FILE)
 
 # default valgrind tool
-BASE_TOOL = valgrind $(ORIGIN) $(LEAK_CHECK) $(LEAK_KIND)
-
-# specific valgrind tool (change options as needed)
-BASE_TOOL += $(CHILDREN) $(FD_TRACK)
-
-LEAK_TOOL = $(BASE_TOOL) $(LOG_FILE)
-SUPP_TOOL = $(BASE_TOOL) $(SUPP_GEN) $(LOG_FILE)
+BASE_TOOL	= valgrind $(ORIGIN) $(LEAK_CHECK) $(LEAK_KIND)
+# **************************************************************************** #
+# specific valgrind tool (add 'valgrind option' variables as needed)
+BASE_TOOL	+= 
+# **************************************************************************** #	TODO: check if we should put messages as an echo instead of a target
+LEAK_TOOL	= $(BASE_TOOL) $(LOG_FILE)
+SUPP_TOOL	= $(BASE_TOOL) $(SUPP_GEN) $(LOG_FILE)
 
 # run valgrind
 leaks_msg:
@@ -207,7 +278,7 @@ leaks: leaks_msg debug
 		echo "#\n[$(BOLD)$(PURPLE)valgrind$(RESET)] \
 		$(ORANGE)info in: $(CYAN)$(VAL_LOG)$(RESET)"; \
 	else \
-		echo "Please install valgrind to use the leaks feature"; \
+		echo "Please install valgrind to use the 'leaks' feature"; \
 	fi
 
 # generate suppression file
@@ -242,12 +313,45 @@ vclean:
 		$(YELLOW)no log file to remove$(RESET)"; \
 	fi
 
-.PHONY: leaks supp suppleaks vclean
+.PHONY: leaks_msg leaks supp_msg supp suppleaks_msg suppleaks vclean
 # **************************************************************************** #
-ffclean: fclean vclean
-	@$(REMOVE) $(NAME).dSYM
+# ---------------------------------- UTILS ----------------------------------- #
+# **************************************************************************** #
+run: all
+	./$(NAME) $(ARGS)
 
-.PHONY: ffclean
+debug: C_FLAGS += -g
+debug: re
+
+$(TMP_DIR):
+	@mkdir -p $(TMP_DIR)
+
+# ffclean: fclean vclean mlxclean
+ffclean: fclean vclean
+	@$(MAKE) fclean -C $(LIBFT_DIR) $(NPD)
+	@$(REMOVE) $(TMP_DIR) $(INIT_CHECK) $(NAME).dSYM
+
+.PHONY: run debug ffclean
+# **************************************************************************** #
+# ---------------------------------- BACKUP (zip) ---------------------------- #
+# **************************************************************************** #
+USER		:=$(shell whoami)
+ROOT_DIR	:=$(notdir $(shell pwd))
+TIMESTAMP	:=$(shell date "+%Y%m%d_%H%M%S")
+BACKUP_NAME	:=$(ROOT_DIR)_$(USER)_$(TIMESTAMP).zip
+MOVE_TO		:= ~/Desktop/$(BACKUP_NAME)
+
+zip: ffclean
+	@if which zip > $(VOID); then \
+		zip -r --quiet $(BACKUP_NAME) ./*; \
+		mv $(BACKUP_NAME) $(MOVE_TO); \
+		echo "[$(BOLD)$(PURPLE)$(NAME)$(RESET)] \
+		compressed as: $(CYAN)$(UNDERLINE)$(MOVE_TO)$(RESET)"; \
+	else \
+		echo "Please install zip to use the backup feature"; \
+	fi
+
+.PHONY: zip
 # **************************************************************************** #
 # ------------------------------- DECORATIONS -------------------------------- #
 # **************************************************************************** #
@@ -326,3 +430,60 @@ BG_CYAN		:= $(ESC)[106m
 BG_WHITE	:= $(ESC)[47m
 BG_GRAY		:= $(ESC)[100m
 # **************************************************************************** #
+# ---------------------------------- TESTS ----------------------------------- #
+# **************************************************************************** #
+# testing multiple option targets
+# (add grademe ?)
+
+choose_read:
+	@echo "Are you sure you want to print \"testing\" [y/N] " && read ANSWER; \
+	if [ "$$ANSWER" = "y" ] || [ "$$ANSWER" = "Y" ]; then \
+		echo "testing"; \
+	else \
+		echo "canceling..."; \
+	fi
+
+choose_case:
+	@echo "Select a project to clone:"
+	@echo "1. Project A"
+	@echo "2. Project B"
+	@echo "3. Project C"
+	@read choice; \
+	case $$choice in \
+		1) echo "Cloning Project A..."; \
+			echo "AAAAA" ;; \
+		2) echo "Cloning Project B..."; \
+			echo "BBBBB" ;; \
+		3) echo "Cloning Project C..."; \
+			echo "CCCCC" ;; \
+		*) echo "Invalid choice. Exiting." ;; \
+	esac
+
+.PHONY: choose_read choose_case
+
+# choose:
+# 	@echo "Select a project to clone:"
+# 	@echo "1. libft"
+# 	@echo "2. push_swap"
+# 	@echo "3. FdF"
+# 	@echo "4. pipex"
+# 	@echo "5. Minishell"
+# 	@echo "6. Cub3D"
+# 	@echo "\n(tester projects)\n"
+# 	@echo "7. Placeholder"
+# 	@echo "8. minilibx_project"
+# 	@echo "8. MLX_project"
+# 	@read choice; \
+# 	case $$choice in \
+# 		1) echo "Cloning Project A..."; \
+# 			git clone --recurse-submodules <project-A-repository-url> ;; \
+# 		2) echo "Cloning Project B..."; \
+# 			git clone --recurse-submodules <project-B-repository-url> ;; \
+# 		3) echo "Cloning Project C..."; \
+# 			git clone --recurse-submodules <project-C-repository-url> ;; \
+# 		5) echo "Cloning Project C..."; \
+# 		*) echo "Invalid choice. Exiting." ;; \
+# 	esac
+
+# .PHONY: choose
+
