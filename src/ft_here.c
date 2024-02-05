@@ -6,7 +6,7 @@
 /*   By: cdumais <cdumais@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/12/08 22:54:50 by cdumais           #+#    #+#             */
-/*   Updated: 2023/12/08 22:56:49 by cdumais          ###   ########.fr       */
+/*   Updated: 2024/02/05 13:36:32 by cdumais          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,9 +14,9 @@
 
 /*
 for testing purposes
-**(usage: here(__FILE__, __LINE__);*
+**(usage: _here(__FILE__, __LINE__);*
 */
-void	ft_here(char *file, int line)
+void	_here(char *file, int line)
 {
-	printf("HERE (%s, l.%d)\n", file, line);
+	ft_printf("HERE (%s, l.%d)\n", file, line);
 }

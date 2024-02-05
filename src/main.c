@@ -6,7 +6,7 @@
 /*   By: cdumais <cdumais@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/20 22:08:14 by cdumais           #+#    #+#             */
-/*   Updated: 2023/12/08 22:57:07 by cdumais          ###   ########.fr       */
+/*   Updated: 2024/02/05 13:36:44 by cdumais          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,16 +14,17 @@
 
 void	ft_testing(void)
 {
-	ft_here(__FILE__, __LINE__);
+	_here(__FILE__, __LINE__);
 }
 
-int		main(int argc, char **argv)
+int		main(int argc, char **argv, char **envp)
 {
 	(void)argc;
 	(void)argv;
 	// 
 	ft_testing();
-
+	// 
+	ft_uname(envp);
 	// 
 	return (0);
 }
