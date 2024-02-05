@@ -6,12 +6,13 @@
 #    By: cdumais <cdumais@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/06/19 21:05:52 by cdumais           #+#    #+#              #
-#    Updated: 2024/01/16 11:44:43 by cdumais          ###   ########.fr        #
+#    Updated: 2024/02/05 13:42:52 by cdumais          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 # TOCHECK: Hyperlinks !!
 # @echo "\033]8;;file://$(FILENAME)\a$(FILENAME)\033]8;;\a for results."
+
 
 # **************************************************************************** #
 # --------------------------------- VARIABLES -------------------------------- #
@@ -25,6 +26,7 @@ LIB_DIR		:= lib
 OBJ_DIR		:= obj
 SRC_DIR		:= src
 TMP_DIR		:= tmp
+WAV_DIR		:= wav
 
 COMPILE		:= gcc
 C_FLAGS		:= -Wall -Wextra -Werror
@@ -321,7 +323,8 @@ vclean:
 # ---------------------------------- UTILS ----------------------------------- #
 # **************************************************************************** #
 run: all
-	./$(NAME) $(ARGS)
+	@echo "$(GREEN)$(BOLD)./$(NAME) $(ARGS)$(RESET)\n"
+	@./$(NAME) $(ARGS)
 
 debug: C_FLAGS += -g
 debug: re
@@ -597,3 +600,83 @@ colortest:
 # https://patorjk.com/ #(not secure, then choose text to ASCII art generator)
 # 
 # prefered fonts:	ANSI Regular, ANSI Shadow
+
+
+# **************************************************************************** #
+# --------------------------------- SOUNDS ----------------------------------- #
+# **************************************************************************** #
+# Using .wav sounds
+
+# https://sound-effects.bbcrewind.co.uk/
+# https://soundbible.com/
+
+# or convert youtube/mp3/etc. to .wav
+
+# aplay (linux)
+# afplay (mac)
+
+# Usage:
+# afplay [option...] audio_file
+
+# Options: (may appear before or after arguments)
+#   {-v | --volume} VOLUME
+# 	set the volume for playback of the file
+#   {-h | --help}
+# 	print help
+#   { --leaks}
+# 	run leaks analysis
+#   {-t | --time} TIME
+# 	play for TIME seconds
+#   {-r | --rate} RATE
+# 	play at playback rate
+#   {-q | --rQuality} QUALITY
+# 	set the quality used for rate-scaled playback (default is 0 - low quality, 1 - high quality)
+#   {-d | --debug}
+# 	debug print output
+
+SOUND	:=
+
+ifeq ($(OS),Darwin)
+	SOUND := @afplay
+else
+	SOUND := @aplay || echo "Problems with audio player"
+endif
+
+sound:
+	@echo "testing .wav sounds"
+	$(SOUND) $(WAV_DIR)/.destroy.wav
+
+.PHONY: sound
+
+# **************************************************************************** #
+# Multiple Makefiles test (for minilibx maybe?)
+
+
+# ifeq ($(OS),Linux)
+# 	NAME = Makefile_linux.mk
+# endif
+# ifeq ($(OS),Darwin)
+# 	NAME = Makefile_mac.mk
+# endif
+
+# all: $(NAME)
+# 	$(MAKE) -f $(NAME) all
+
+# $(NAME):
+
+# bonus:
+# 	$(MAKE) -f $(NAME) bonus
+
+# clean:
+# 	$(MAKE) -f $(NAME) clean
+
+# fclean:
+# 	$(MAKE) -f $(NAME) fclean
+
+# re:
+# 	$(MAKE) -f $(NAME) re
+
+# .PHONY: all bonus clean fclean re
+# ************************************ #
+
+
