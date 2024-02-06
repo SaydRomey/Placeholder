@@ -6,7 +6,7 @@
 #    By: cdumais <cdumais@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/06/19 21:05:52 by cdumais           #+#    #+#              #
-#    Updated: 2024/02/05 13:42:52 by cdumais          ###   ########.fr        #
+#    Updated: 2024/02/05 18:16:44 by cdumais          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -589,6 +589,7 @@ colortest:
 # https://www.gnu.org/software/make/manual/html_node/Pattern-Examples.html
 # https://www.gnu.org/software/make/manual/html_node/Text-Functions.html
 # https://www.gnu.org/software/make/manual/html_node/File-Name-Functions.html
+# https://www.gnu.org/software/make/manual/make.html#Conditional-Syntax
 # 
 # ANSI escape codes;
 # https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797
