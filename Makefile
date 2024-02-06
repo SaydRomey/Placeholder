@@ -6,7 +6,7 @@
 #    By: cdumais <cdumais@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/06/19 21:05:52 by cdumais           #+#    #+#              #
-#    Updated: 2024/02/05 18:16:44 by cdumais          ###   ########.fr        #
+#    Updated: 2024/02/06 16:30:28 by cdumais          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -679,5 +679,44 @@ sound:
 
 # .PHONY: all bonus clean fclean re
 # ************************************ #
+# **************************************************************************** #
+# ------------------------------- ANIMATIONS --------------------------------- #
+# **************************************************************************** #
+# Animation shell script
+SPIN_SH		:= ./spinner.sh
+
+# Message to display alongside the animation
+SPIN_MSG	:= "Simulating compilation and linking for five seconds..."
+
+# Create the file to stop the spinner
+SPIN_FILE	:= ".testfile"
+
+# spin time to stimulate duration (will be replaced by an other process)
+PROCESS		:= sleep 5
+
+spin:
+	@$(REMOVE) $(SPIN_FILE)
+	@echo "$(BOLD)$(PURPLE)Starting a long running task...$(RESET)"
+	@$(SPIN_SH) $(SPIN_MSG) $(SPIN_FILE) &
+	@$(PROCESS)
+	@touch $(SPIN_FILE)
+	@sleep 0.2
+	@printf "$(UP)$(ERASE_LINE)"
+	@echo "$(BOLD)$(GREEN)Long-running task completed.$(RESET)"
+	@$(MAKE) spin2 $(NPD)
 
 
+SPIN_MSG2	:= "Simulating something else for three seconds..."
+PROCESS2	:= sleep 3
+
+spin2:
+	@$(REMOVE) $(SPIN_FILE)
+	@echo "$(BOLD)$(PURPLE)Starting a shorter running task...$(RESET)"
+	@$(SPIN_SH) $(SPIN_MSG2) $(SPIN_FILE) &
+	@$(PROCESS2)
+	@touch $(SPIN_FILE)
+	@sleep 0.2
+	@printf "$(UP)$(ERASE_LINE)"
+	@echo "$(BOLD)$(GREEN)shorter task completed.$(RESET)"
+
+.PHONY: spin spin2
