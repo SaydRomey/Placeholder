@@ -6,7 +6,7 @@
 #    By: cdumais <cdumais@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/06/19 21:05:52 by cdumais           #+#    #+#              #
-#    Updated: 2024/02/06 16:30:28 by cdumais          ###   ########.fr        #
+#    Updated: 2024/02/12 17:22:30 by cdumais          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -697,6 +697,7 @@ PROCESS		:= sleep 5
 spin:
 	@$(REMOVE) $(SPIN_FILE)
 	@echo "$(BOLD)$(PURPLE)Starting a long running task...$(RESET)"
+	@chmod +x $(SPIN_SH)
 	@$(SPIN_SH) $(SPIN_MSG) $(SPIN_FILE) &
 	@$(PROCESS)
 	@touch $(SPIN_FILE)
@@ -704,8 +705,10 @@ spin:
 	@printf "$(UP)$(ERASE_LINE)"
 	@echo "$(BOLD)$(GREEN)Long-running task completed.$(RESET)"
 	@$(MAKE) spin2 $(NPD)
+	@echo "$(BOLD)$(PURPLE)Both 'spin' and 'spin2' are finished$(RESET)"
 
 
+# This part is a test to simulate a second nested process
 SPIN_MSG2	:= "Simulating something else for three seconds..."
 PROCESS2	:= sleep 3
 
