@@ -6,7 +6,7 @@
 #    By: cdumais <cdumais@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/06/19 21:05:52 by cdumais           #+#    #+#              #
-#    Updated: 2024/02/12 17:22:30 by cdumais          ###   ########.fr        #
+#    Updated: 2024/02/22 11:37:08 by cdumais          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -723,3 +723,175 @@ spin2:
 	@echo "$(BOLD)$(GREEN)shorter task completed.$(RESET)"
 
 .PHONY: spin spin2
+
+# **************************************************************************** #
+# ----------------------------------- CUBE ----------------------------------- #
+# **************************************************************************** #
+# https://www.asciiart.eu/art-and-design/geometries
+
+define HASH_CUBE
+      #########.
+     ########",#:
+   #########',##".
+  ##'##'## .##',##.
+   ## ## ## # ##",#.
+    ## ## ## ## ##'
+     ## ## ## :##
+      ## ## ##."
+endef
+export HASH_CUBE
+
+
+
+define ALL_FRAMES
++------+.      +------+       +------+       +------+      .+------+
+|`.    | `.    |\     |\      |      |      /|     /|    .' |    .'|
+|  `+--+---+   | +----+-+     +------+     +-+----+ |   +---+--+'  |
+|   |  |   |   | |    | |     |      |     | |    | |   |   |  |   |
++---+--+.  |   +-+----+ |     +------+     | +----+-+   |  .+--+---+
+ `. |    `.|    \|     \|     |      |     |/     |/    |.'    | .'
+   `+------+     +------+     +------+     +------+     +------+'
+   .+------+     +------+     +------+     +------+     +------+.
+ .' |    .'|    /|     /|     |      |     |\     |\    |`.    | `.
++---+--+'  |   +-+----+ |     +------+     | +----+-+   |  `+--+---+
+|   |  |   |   | |    | |     |      |     | |    | |   |   |  |   |
+|  ,+--+---+   | +----+-+     +------+     +-+----+ |   +---+--+   |
+|.'    | .'    |/     |/      |      |      \|     \|    `. |   `. |
++------+'      +------+       +------+       +------+      `+------+
+endef
+export ALL_FRAMES
+
+# Frames
+define CUBE_FRAME_1
++------+.
+|`.    | `.
+|  `+--+---+
+|   |  |   |
++---+--+.  |
+ `. |    `.|
+   `+------+
+endef
+export CUBE_FRAME_1
+
+define CUBE_FRAME_2
++------+
+|\\     |\\
+| +----+-+
+| |    | |
++-+----+ |
+ \\|     \\|
+ +------+
+endef
+export CUBE_FRAME_2
+
+define CUBE_FRAME_3
++------+
+|      |
++------+
+|      |
++------+
+|      |
++------+
+endef
+export CUBE_FRAME_3
+
+define CUBE_FRAME_4
+  +------+ 
+ /|     /| 
++-+----+ | 
+| |    | | 
+| +----+-+ 
+|/     |/  
++------+   
+endef
+export CUBE_FRAME_4
+
+define CUBE_FRAME_5
+   .+------+
+ .' |    .'|
++---+--+'  |
+|   |  |   |
+|  .+--+---+
+|.'    | .'
++------+'
+endef
+export CUBE_FRAME_5
+
+define CUBE_FRAME_6
+   .+------+
+ .' |    .'|
++---+--+'  |
+|   |  |   |
+|  ,+--+---+
+|.'    | .'
++------+'
+endef
+export CUBE_FRAME_6
+
+define CUBE_FRAME_7
+  +------+ 
+ /|     /| 
++-+----+ | 
+| |    | | 
+| +----+-+ 
+|/     |/  
++------+   
+endef
+export CUBE_FRAME_7
+
+define CUBE_FRAME_8
++------+ 
+|      | 
++------+ 
+|      | 
++------+ 
+|      | 
++------+ 
+endef
+export CUBE_FRAME_8
+
+define CUBE_FRAME_9
++------+   
+|\\     |\\  
+| +----+-+ 
+| |    | | 
++-+----+ | 
+ \\|     \\| 
+  +------+ 
+endef
+export CUBE_FRAME_9
+
+define CUBE_FRAME_10
++------+.
+|`.    | `.
+|  `+--+---+
+|   |  |   |
++---+--+   |
+ `. |   `. |
+   `+------+
+endef
+export CUBE_FRAME_10
+
+# Animation test
+cube:
+	@clear
+	@for i in 1 2 3 4 5 10 9 8 7 6 1 2 3; do \
+		case $$i in \
+		1) echo "$$CUBE_FRAME_1";;\
+		2) echo "$$CUBE_FRAME_2";;\
+		3) echo "$$CUBE_FRAME_3";;\
+		4) echo "$$CUBE_FRAME_4";;\
+		5) echo "$$CUBE_FRAME_5";;\
+		6) echo "$$CUBE_FRAME_6";;\
+		7) echo "$$CUBE_FRAME_7";;\
+		8) echo "$$CUBE_FRAME_8";;\
+		9) echo "$$CUBE_FRAME_9";;\
+		10) echo "$$CUBE_FRAME_10";;\
+		esac; \
+		sleep 0.1; \
+		clear; \
+	done
+	@echo "need to stabilize the location of the cubes in each frame *!!"
+
+.PHONY: cube
+

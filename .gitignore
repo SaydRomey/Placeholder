@@ -1,18 +1,26 @@
 
-# executable
-placeholder
-
-obj
-tmp
-
-*.dSYM
-.DS_Store
-.vscode
-
+# object files and archives in all directories
 *.o
 *.a
 *.s
 
+# PDFs
 *.pdf
-*.init_check
-*.testfile
+
+# MacOS specific files
+*.dSYM
+.DS_Store
+
+# Visual Studio Code settings
+.vscode
+
+# tmp, and obj directories in all directories
+**/tmp/
+**/obj/
+
+# Sentinel files
+.init_check
+.testfile
+
+# Executables
+cub3D
