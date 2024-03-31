@@ -6,12 +6,11 @@
 /*   By: cdumais <cdumais@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/02/05 13:10:27 by cdumais           #+#    #+#             */
-/*   Updated: 2024/02/05 13:35:23 by cdumais          ###   ########.fr       */
+/*   Updated: 2024/03/31 18:20:42 by cdumais          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "placeholder.h"
-#include <sys/errno.h>
 
 static void ft_exec(char *file, char **args, char **envp)
 {
