@@ -6,21 +6,19 @@
 #    By: cdumais <cdumais@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/06/19 21:05:52 by cdumais           #+#    #+#              #
-#    Updated: 2024/02/22 11:37:08 by cdumais          ###   ########.fr        #
+#    Updated: 2024/05/09 19:48:05 by cdumais          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
-
-# TOCHECK: Hyperlinks !!
-# @echo "\033]8;;file://$(FILENAME)\a$(FILENAME)\033]8;;\a for results."
-
 
 # **************************************************************************** #
 # --------------------------------- VARIABLES -------------------------------- #
 # **************************************************************************** #
 NAME		:= placeholder
+AUTHOR		:= $(USER)
 ARGS		:= # redefine in command line: 'make run ARGS=Makefile'
 # override ARGS = infile.txt # this prevents redefining the 'ARGS' variable
 
+CFG_DIR		:= .cfg
 INC_DIR		:= inc
 LIB_DIR		:= lib
 OBJ_DIR		:= obj
@@ -28,14 +26,23 @@ SRC_DIR		:= src
 TMP_DIR		:= tmp
 WAV_DIR		:= wav
 
+# https://gcc.gnu.org/onlinedocs/gcc/Optimize-Options.html
+# -Ofast	-> 
+# -flto		-> link-time optimisation
+
 COMPILE		:= gcc
-C_FLAGS		:= -Wall -Wextra -Werror
+OPTIMIZE	:= -Ofast -flto
+DEBUG_FLAGS	:= -g
+C_FLAGS		:= -Wall -Wextra -Werror $(OPTIMIZE)
+L_FLAGS		:=
 HEADERS		:= -I$(INC_DIR)
 
 REMOVE		:= rm -rf
 NPD			:= --no-print-directory
 VOID		:= /dev/null
-OS			:= $(shell uname -s)
+OS			:= $(shell uname)
+USER		:= $(shell whoami)
+TIME		:= $(shell date "+%H:%M:%S")
 # **************************************************************************** #
 # ---------------------------------- LIBFT ----------------------------------- #
 # **************************************************************************** #
@@ -44,25 +51,29 @@ LIBFT_INC	:= $(LIBFT_DIR)/$(INC_DIR)
 LIBFT		:= $(LIBFT_DIR)/libft.a
 HEADERS		:= $(HEADERS) -I$(LIBFT_INC)
 # **************************************************************************** #
-# -------------------------------- MINILIBX (variables) ---------------------- #
+# ----------------------------------- MLX ------------------------------------ #
 # **************************************************************************** #
-# MLX_DIR		:= $(LIB_DIR)/minilibx
+MLX_DIR		:= $(LIB_DIR)/MLX42
+MLX_INC		:= $(MLX_DIR)/include/MLX42
+MLX_BLD		:= $(MLX_DIR)/build
+MLX42		:= $(MLX_BLD)/libmlx42.a
 
-# ifeq ($(OS), Linux)
-# 	C_FLAGS	:= $(CFLAGS) -D OS=$(OS) #(check if this works better) ?
-# 	END_SRC := cleanup_linux.c
-# 	MLX_DIR := $(MLX_DIR)/minilibx_linux
-# 	L_FLAGS := -L$(MLX_DIR) -lmlx -lbsd -lXext -lX11 -lm
-# else ifeq ($(OS), Darwin)
-# 	END_SRC := cleanup_mac.c
-# 	MLX_DIR := $(MLX_DIR)/minilibx_macos
-# 	L_FLAGS := -L$(MLX_DIR) -lmlx -framework OpenGL -framework AppKit
-# else
-# 	$(error Unsupported operating system: $(UNAME))
-# endif
+L_FLAGS		:= $(L_FLAGS) -L$(MLX_BLD) -lmlx42
+HEADERS		:= $(HEADERS) -I$(MLX_INC)
+# **************************************************************************** #
+# ---------------------------------- CONFIG  --------------------------------- #
+# **************************************************************************** #
+# TODO: adapt default to desired dimensions in config_*.mk
+# 
+ifeq ($(OS),Linux)
+include $(CFG_DIR)/config_linux.mk
+else ifeq ($(OS),Darwin)
+include $(CFG_DIR)/config_mac.mk
+else
+$(error Unsupported operating system: $(OS))
+endif
 
-# MLX			:= $(MLX_DIR)/libmlx.a
-# HEADERS		:= $(HEADERS) -I$(MLX_DIR)
+C_FLAGS		+= -DWIDTH=$(SCREEN_W) -DHEIGHT=$(SCREEN_H)
 # **************************************************************************** #
 # -------------------------------- SUBMODULES  ------------------------------- #
 # **************************************************************************** #
@@ -75,15 +86,9 @@ INIT		:= $(if $(wildcard $(INIT_CHECK)),,init_submodules)
 # **************************************************************************** #
 # --------------------------------- C FILES ---------------------------------- #
 # **************************************************************************** #
-# SRC		:=	$(END_SRC)
+# SRC		:=	
 # **************************************************************************** #
 # -------------------------------- ALL FILES --------------------------------- #
-# **************************************************************************** #
-# INCS		:=	$(addprefix $(INC_DIR)/, $(addsuffix .h, $(INC)))
-# SRCS		:=	$(addprefix $(SRC_DIR)/, $(addsuffix .c, $(SRC)))
-# OBJS		:=	$(patsubst $(SRC_DIR)/%.c,$(OBJ_DIR)/%.o,$(SRCS))
-# **************************************************************************** #
-# -------------------------------- ALL * FILES ------------------------------- #
 # **************************************************************************** #
 # INCS		:=	$(addprefix $(INC_DIR)/, $(addsuffix .h, $(INC)))
 # SRCS		:=	$(addprefix $(SRC_DIR)/, $(addsuffix .c, $(SRC)))
@@ -97,27 +102,24 @@ OBJS		:=	$(patsubst $(SRC_DIR)/%.c,$(OBJ_DIR)/%.o,$(SRCS))
 # **************************************************************************** #
 # ---------------------------------- RULES ----------------------------------- #
 # **************************************************************************** #
-all: $(INIT) $(NAME)
+all: $(INIT) $(PIC) $(NAME)
 
-# $(NAME): $(LIBFT) $(OBJS) $(INCS) $(MLX)
-$(NAME): $(LIBFT) $(OBJS) $(INCS)
-	@echo "[$(BOLD)$(PURPLE)$(NAME)$(RESET)]\\t$(GREEN)created$(RESET)"
-	@echo "$(GREEN)$$TITLE$(RESET)"
+$(NAME): $(MLX42) $(LIBFT) $(OBJS) $(INCS)
+	@$(COMPILE) $(C_FLAGS) $(HEADERS) $(OBJS) $(LIBFT) $(L_FLAGS) -o $@
+	@echo "$$TITLE"
 	@echo "Compiled for $(ITALIC)$(BOLD)$(PURPLE)$(USER)$(RESET) \
 		$(CYAN)$(TIME)$(RESET)\n"
-	@$(COMPILE) $(C_FLAGS) $(HEADERS) $(OBJS) $(LIBFT) -o $@
-# @$(COMPILE) $(C_FLAGS) $(HEADERS) $(OBJS) $(LIBFT) $(L_FLAGS) -o $@
 
 $(LIBFT):
 	@$(MAKE) -C $(LIBFT_DIR) $(NPD)
 
-# $(MLX):
-# 	@echo "Building minilibx in $(CYAN)$(UNDERLINE)$(MLX_DIR)$(RESET)..."
-# 	@$(MAKE) -C $(MLX_DIR) > $(VOID) 2>&1 || \
-# 		(echo "Failed to build minilibx in $(MLX_DIR)" && exit 1)
-# 	@printf "$(UP)$(ERASE_LINE)"
-# 	@echo "[$(BOLD)$(PURPLE)minilibx$(RESET)] \
-# 	$(GREEN)\tbuilt successfully$(RESET)"
+$(MLX42):
+	@echo "Building MLX42..."
+	@cmake -S lib/MLX42 -B lib/MLX42/build -Wno-dev
+	@echo "Compiling MLX42..."
+	@$(MAKE) -C lib/MLX42/build -j4 $(NPD)
+	@echo "[$(BOLD)$(PURPLE)MLX42$(RESET)] \
+	$(GREEN)\tbuilt successfully$(RESET)"
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c $(INCS) | $(OBJ_DIR)
 	@echo "$(CYAN)Compiling...$(ORANGE)\t$(notdir $<)$(RESET)"
@@ -127,9 +129,8 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c $(INCS) | $(OBJ_DIR)
 $(OBJ_DIR):
 	@mkdir -p $(OBJ_DIR)
 
-# @if [ -d "$(OBJ_DIR)" ]; then
 clean:
-	@if [ -n "$(wildcard $(OBJ_DIR))" ]; then \
+	@if [ -d "$(OBJ_DIR)" ]; then \
 		$(REMOVE) $(OBJ_DIR); \
 		echo "[$(BOLD)$(PURPLE)$(NAME)$(RESET)] \
 		$(GREEN)Object files removed$(RESET)"; \
@@ -148,55 +149,60 @@ fclean: clean
 		echo "[$(BOLD)$(PURPLE)$(NAME)$(RESET)] \
 		$(YELLOW)No executable to remove$(RESET)"; \
 	fi
-	@if [ -n "$(wildcard $(LIBFT))" ]; then \
-		$(REMOVE) $(LIBFT); \
-		echo "[$(BOLD)$(PURPLE)$(notdir $(LIBFT))$(RESET)] \
-		$(GREEN)$(notdir $(LIBFT)) removed$(RESET)"; \
-	else \
-		echo "[$(BOLD)$(PURPLE)$(notdir $(LIBFT))$(RESET)] \
-		$(YELLOW)No library to remove$(RESET)"; \
-	fi
+	@$(REMOVE) $(BONUS_CHECK) $(PIC_CHECK)
+	@$(REMOVE) 
 
 re: fclean all
 
 .PHONY: all clean fclean re
 # **************************************************************************** #
-# -------------------------------- MINILIBX ---------------------------------- #
+# ----------------------------------- MLX ------------------------------------ #
 # **************************************************************************** #
-# mlxclean:
-# 	@if [ -f $(MLX) ]; then \
-# 		make clean -C $(MLX_DIR) > $(VOID) 2>&1 || (echo "mlx clean error" \
-# 			&& exit 1); \
-# 		echo "[$(BOLD)$(PURPLE)minilibx$(RESET)] \
-# 		$(GREEN)Library removed$(RESET)"; \
-# 	else \
-# 		echo "[$(BOLD)$(PURPLE)minilibx$(RESET)] \
-# 		$(YELLOW)No library to remove$(RESET)"; \
-# 	fi
+# TODO: add the option to recompile MLX with debug flag in this section...
+# 
+mlxclean:
+	@if [ -f $(MLX42) ]; then \
+		$(REMOVE) $(MLX_BLD); \
+		echo "[$(BOLD)$(PURPLE)MLX42$(RESET)] \
+		$(GREEN)Library removed$(RESET)"; \
+	else \
+		echo "[$(BOLD)$(PURPLE)MLX42$(RESET)] \
+		$(YELLOW)No library to remove$(RESET)"; \
+	fi
 
-# .PHONY: mlxclean
+mlxref:
+	@$(OPEN) "https://github.com/codam-coding-college/MLX42/tree/master/docs"
+
+.PHONY: mlxclean mlxref
 # **************************************************************************** #
 # ----------------------------------- GIT ------------------------------------ #
 # **************************************************************************** #
 init_submodules: $(INIT_CHECK)
 
+WHEN	:= $(shell date "+On day %d of month %m in the year %Y at %H:%M and %S seconds")
+
 $(INIT_CHECK):
 	@git submodule update --init --recursive
-	@touch $@
+	@echo "$(NAME)\n\
+	by $(AUTHOR)\n\
+	Compiled for $(USER)\n\
+	$(WHEN)\n\
+	$(MACHINE)" > $@
 
-# ifeq ($(OS), Linux)
-# 	@chmod +x $(MLX_DIR)/configure
-# endif
+MAIN_BRANCH	:= $(shell git branch -r \
+| grep -E 'origin/(main|master)' \
+| grep -v 'HEAD' | head -n 1 | sed 's@^.*origin/@@')
 
 update:
 	@echo "Are you sure you want to update the repo and submodules? [y/N] " \
 	&& read ANSWER; \
 	if [ "$$ANSWER" = "y" ] || [ "$$ANSWER" = "Y" ]; then \
-		git pull origin main; \
+		echo "Updating repository from branch $(CYAN)$(MAIN_BRANCH)$(RESET)..."; \
+		git pull origin $(MAIN_BRANCH); \
 		$(MAKE) init_submodules; \
-		echo "Repository and submodules updated."; \
+		echo "Repository updated."; \
 	else \
-		echo "canceling update..."; \
+		echo "Canceling update..."; \
 	fi
 
 .PHONY: init_submodules update
@@ -238,106 +244,35 @@ endif
 
 .PHONY: pdf
 # **************************************************************************** #
-# -------------------------------- LEAKS ------------------------------------- #
-# **************************************************************************** #
-VAL_CHECK	:= $(shell which valgrind > $(VOID); echo $$?)
-
-# valgrind options
-ORIGIN		:= --track-origins=yes
-LEAK_CHECK	:= --leak-check=full
-LEAK_KIND	:= --show-leak-kinds=all
-
-# valgrind additional options
-CHILDREN	:= --trace-children=yes
-FD_TRACK	:= --track-fds=yes
-HELGRIND	:= --tool=helgrind
-NO_REACH	:= --show-reachable=no
-VERBOSE		:= --verbose
-VAL_LOG		:= valgrind-out.txt
-LOG_FILE	:= --log-file=$(VAL_LOG)
-
-# suppression-related options
-SUPP_FILE	:= suppression.supp
-SUPP_GEN	:= --gen-suppressions=all
-SUPPRESS	:= --suppressions=$(SUPP_FILE)
-
-# default valgrind tool
-BASE_TOOL	= valgrind $(ORIGIN) $(LEAK_CHECK) $(LEAK_KIND)
-# **************************************************************************** #
-# specific valgrind tool (add 'valgrind option' variables as needed)
-BASE_TOOL	+= 
-# **************************************************************************** #	TODO: check if we should put messages as an echo instead of a target
-LEAK_TOOL	= $(BASE_TOOL) $(LOG_FILE)
-SUPP_TOOL	= $(BASE_TOOL) $(SUPP_GEN) $(LOG_FILE)
-
-# run valgrind
-leaks_msg:
-	@echo "[$(BOLD)$(PURPLE)valgrind$(RESET)] \
-	$(ORANGE)\tRecompiling with debug flags$(RESET)"
-
-leaks: leaks_msg debug
-	@if [ $(VAL_CHECK) -eq 0 ]; then \
-		echo "[$(BOLD)$(PURPLE)valgrind$(RESET)] \
-		$(ORANGE)Launching valgrind\n$(RESET)#"; \
-		$(LEAK_TOOL) ./$(NAME) $(ARGS); \
-		echo "#\n[$(BOLD)$(PURPLE)valgrind$(RESET)] \
-		$(ORANGE)info in: $(CYAN)$(VAL_LOG)$(RESET)"; \
-	else \
-		echo "Please install valgrind to use the 'leaks' feature"; \
-	fi
-
-# generate suppression file
-supp_msg:
-	@echo "generating suppression file"
-supp: leaks_msg supp_msg debug
-	$(SUPP_TOOL) ./$(NAME) $(ARGS) && \
-	awk '/^{/,/^}/' valgrind-out.txt > suppression.supp
-
-# use suppression file
-suppleaks_msg:
-	@echo "launching valgrind with suppression file"
-suppleaks: debug
-	$(LEAK_TOOL) $(SUPPRESS) ./$(NAME) $(ARGS)
-
-# remove suppression and log files
-vclean:
-	@if [ -n "$(wildcard suppression.supp)" ]; then \
-		$(REMOVE) $(SUPP_FILE); \
-		echo "[$(BOLD)$(PURPLE)$(NAME)$(RESET)] \
-		$(GREEN)suppression file removed$(RESET)"; \
-	else \
-		echo "[$(BOLD)$(PURPLE)$(NAME)$(RESET)] \
-		$(YELLOW)no suppression file to remove$(RESET)"; \
-	fi
-	@if [ -n "$(wildcard valgrind-out.txt)" ]; then \
-		$(REMOVE) valgrind-out.txt; \
-		echo "[$(BOLD)$(PURPLE)$(NAME)$(RESET)] \
-		$(GREEN)log file removed$(RESET)"; \
-	else \
-		echo "[$(BOLD)$(PURPLE)$(NAME)$(RESET)] \
-		$(YELLOW)no log file to remove$(RESET)"; \
-	fi
-
-.PHONY: leaks_msg leaks supp_msg supp suppleaks_msg suppleaks vclean
-# **************************************************************************** #
 # ---------------------------------- UTILS ----------------------------------- #
 # **************************************************************************** #
+include $(CFG_DIR)/leaks.mk
+
 run: all
 	@echo "$(GREEN)$(BOLD)./$(NAME) $(ARGS)$(RESET)\n"
 	@./$(NAME) $(ARGS)
 
-debug: C_FLAGS += -g
+debug: C_FLAGS += $(DEBUG_FLAGS)
 debug: re
 
 $(TMP_DIR):
 	@mkdir -p $(TMP_DIR)
 
-# ffclean: fclean vclean mlxclean
-ffclean: fclean vclean
+ffclean: fclean vclean mlxclean
 	@$(MAKE) fclean -C $(LIBFT_DIR) $(NPD)
 	@$(REMOVE) $(TMP_DIR) $(INIT_CHECK) $(NAME).dSYM
 
-.PHONY: run debug ffclean
+FORCE_FLAGS	:= \
+-Wno-unused-variable \
+-Wno-unused-function
+
+force: C_FLAGS += $(FORCE_FLAGS)
+force: re
+	@echo "adding flags $(YELLOW)$(FORCE_FLAGS)$(RESET)"
+	@echo "$(RED)Forced compilation$(RESET)"
+	./$(NAME) $(MAP)
+
+.PHONY: run debug ffclean force
 # **************************************************************************** #
 # ---------------------------------- BACKUP (zip) ---------------------------- #
 # **************************************************************************** #
@@ -369,9 +304,6 @@ define TITLE
 
 endef
 export TITLE
-
-USER		:=$(shell whoami)
-TIME		:=$(shell date "+%H:%M:%S")
 
 title:
 	@echo "$(BOLD)$(PURPLE)$(NAME)$(GREEN) created$(RESET)"
@@ -436,6 +368,65 @@ BG_CYAN		:= $(ESC)[106m
 BG_WHITE	:= $(ESC)[47m
 BG_GRAY		:= $(ESC)[100m
 # **************************************************************************** #
+# ------------------------------- ANIMATIONS --------------------------------- #
+# **************************************************************************** #
+# TODO: add a chmod + x to the script
+# TODO: set this up during mlx42's compilation? or when installing brew, cmake, glfw
+# 
+# Animation shell script
+SPIN_SH		:= $(CFG_DIR)/spinner.sh
+
+# Message to display alongside the animation
+SPIN_MSG	:= "Simulating compilation and linking for five seconds..."
+
+# Create the file to stop the spinner (will be replaced by libmlx.a or something)
+SPIN_FILE	:= "$(CFG_DIR)/.tmptestfile"
+
+# spin time to stimulate duration (will be replaced by an other process)
+PROCESS		:= sleep 5
+
+spin:
+	@$(REMOVE) $(SPIN_FILE)
+	@echo "$(BOLD)$(PURPLE)Starting a long running task...$(RESET)"
+	@$(SPIN_SH) $(SPIN_MSG) $(SPIN_FILE) &
+	@$(PROCESS)
+	@touch $(SPIN_FILE)
+	@sleep 0.2
+	@printf "$(UP)$(ERASE_LINE)"
+	@echo "$(BOLD)$(GREEN)Long-running task completed.$(RESET)"
+	@$(MAKE) spin2 $(NPD)
+
+
+SPIN_MSG2	:= "Simulating something else for three seconds..."
+PROCESS2	:= sleep 3
+
+spin2:
+	@$(REMOVE) $(SPIN_FILE)
+	@echo "$(BOLD)$(PURPLE)Starting a shorter running task...$(RESET)"
+	@$(SPIN_SH) $(SPIN_MSG2) $(SPIN_FILE) &
+	@$(PROCESS2)
+	@touch $(SPIN_FILE)
+	@sleep 0.2
+	@printf "$(UP)$(ERASE_LINE)"
+	@echo "$(BOLD)$(GREEN)shorter task completed.$(RESET)"
+
+.PHONY: spin spin2
+# **************************************************************************** #
+# --------------------------------- SOUNDS ----------------------------------- #
+# **************************************************************************** #
+# https://sound-effects.bbcrewind.co.uk/
+# https://soundbible.com/
+# or convert youtube/mp3/etc. to .wav
+# 
+WAV_DESTROY	:= $(WAV_DIR)/destroy.wav
+
+sound:
+	@echo "testing a .wav sound"
+	@$(SOUND) $(WAV_DESTROY)
+	@echo "sound testing finished"
+
+.PHONY: sound
+# **************************************************************************** #
 # ---------------------------------- TESTS ----------------------------------- #
 # **************************************************************************** #
 # testing multiple option targets
@@ -494,7 +485,8 @@ choose_case:
 # .PHONY: choose
 
 # **************************************************************************** #
-
+# **************************************************************************** # *!! put this in ./.cfg/osa.mk (included only if mac)
+# **************************************************************************** #
 define BEAR
    _     _   
   (c).-.(c)  
@@ -573,6 +565,8 @@ show_dock:
 
 
 # **************************************************************************** #
+# **************************************************************************** #
+# **************************************************************************** #
 colortest:
 	@for i in $$(seq 0 255); do \
 		printf "\033[38;5;$$i;48;5;$$((i+1))m█$(RESET)"; \
@@ -581,7 +575,17 @@ colortest:
 # **************************************************************************** #
 # -------------------------------- MISC INFO --------------------------------- #
 # **************************************************************************** #
-# 
+
+# TOCHECK: Hyperlinks !!
+# @echo "\033]8;;file://$(FILENAME)\a$(FILENAME)\033]8;;\a for results."
+
+# TODO/TOCHECK?:
+# replace L_FLAGS by LDFLAGS:
+# Extra flags to give to compilers when they are supposed to invoke the linker,
+# 'ld', such as -L.
+# Non-library linker flags, such as -L, should go in the LDFLAGS variable.
+# Libraries (-lfoo) should be added to the LDLIBS variable instead.
+
 # Makefile variables explanations;
 # https://www.gnu.org/software/make/manual/html_node/Implicit-Variables.html
 # https://www.gnu.org/software/make/manual/html_node/Automatic-Variables.html
@@ -589,14 +593,15 @@ colortest:
 # https://www.gnu.org/software/make/manual/html_node/Pattern-Examples.html
 # https://www.gnu.org/software/make/manual/html_node/Text-Functions.html
 # https://www.gnu.org/software/make/manual/html_node/File-Name-Functions.html
+# https://www.gnu.org/software/make/manual/make.html#Conditionals
 # https://www.gnu.org/software/make/manual/make.html#Conditional-Syntax
-# 
+
 # ANSI escape codes;
 # https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797
-# 
+
 # Image to ascii art;
 # https://github.com/TheZoraiz/ascii-image-converter
-# 
+
 # Text to ascii
 # https://patorjk.com/ #(not secure, then choose text to ASCII art generator)
 # 
@@ -606,292 +611,85 @@ colortest:
 # **************************************************************************** #
 # --------------------------------- SOUNDS ----------------------------------- #
 # **************************************************************************** #
-# Using .wav sounds
-
 # https://sound-effects.bbcrewind.co.uk/
 # https://soundbible.com/
-
 # or convert youtube/mp3/etc. to .wav
-
-# aplay (linux)
-# afplay (mac)
-
-# Usage:
-# afplay [option...] audio_file
-
-# Options: (may appear before or after arguments)
-#   {-v | --volume} VOLUME
-# 	set the volume for playback of the file
-#   {-h | --help}
-# 	print help
-#   { --leaks}
-# 	run leaks analysis
-#   {-t | --time} TIME
-# 	play for TIME seconds
-#   {-r | --rate} RATE
-# 	play at playback rate
-#   {-q | --rQuality} QUALITY
-# 	set the quality used for rate-scaled playback (default is 0 - low quality, 1 - high quality)
-#   {-d | --debug}
-# 	debug print output
-
-SOUND	:=
-
-ifeq ($(OS),Darwin)
-	SOUND := @afplay
-else
-	SOUND := @aplay || echo "Problems with audio player"
-endif
+# **************************************************************************** #
+WAV_DESTROY	:= $(WAV_DIR)/destroy.wav
 
 sound:
-	@echo "testing .wav sounds"
-	$(SOUND) $(WAV_DIR)/.destroy.wav
+	@echo "testing a .wav sound"
+	@$(SOUND) $(WAV_DESTROY)
+	@echo "sound testing finished"
 
 .PHONY: sound
-
 # **************************************************************************** #
-# Multiple Makefiles test (for minilibx maybe?)
-
-
-# ifeq ($(OS),Linux)
-# 	NAME = Makefile_linux.mk
-# endif
-# ifeq ($(OS),Darwin)
-# 	NAME = Makefile_mac.mk
-# endif
-
-# all: $(NAME)
-# 	$(MAKE) -f $(NAME) all
-
-# $(NAME):
-
-# bonus:
-# 	$(MAKE) -f $(NAME) bonus
-
-# clean:
-# 	$(MAKE) -f $(NAME) clean
-
-# fclean:
-# 	$(MAKE) -f $(NAME) fclean
-
-# re:
-# 	$(MAKE) -f $(NAME) re
-
-# .PHONY: all bonus clean fclean re
-# ************************************ #
+# ------------------------------- DEPENDENCIES  ------------------------------ #
 # **************************************************************************** #
-# ------------------------------- ANIMATIONS --------------------------------- #
-# **************************************************************************** #
-# Animation shell script
-SPIN_SH		:= ./spinner.sh
+# TODO: automate this and place in proper submakefile...
 
-# Message to display alongside the animation
-SPIN_MSG	:= "Simulating compilation and linking for five seconds..."
+# **************************************************************************** # Homebrew
+CHECK_BREW := $(shell command -v brew 2> /dev/null)
 
-# Create the file to stop the spinner
-SPIN_FILE	:= ".testfile"
+brew:
+ifndef CHECK_BREW
+	@echo "Installing Homebrew..."
+	curl -fsSL https://rawgit.com/kube/42homebrew/master/install.sh | zsh
+else
+	@echo "Homebrew is already installed, checking for updates..."
+	@brew update
+endif
 
-# spin time to stimulate duration (will be replaced by an other process)
-PROCESS		:= sleep 5
+delete_brew:
+ifndef CHECK_BREW
+	@echo "Homebrew not found"
+else
+	@echo "Removing Homebrew configuration lines from ~/.zshrc..."
+	@sed -i '' \
+		-e '/^# Load Homebrew Fix script/,/^source $$HOME\/.brewconfig.zsh/d' \
+		~/.zshrc
+	@echo "Homebrew configuration removed from ~/.zshrc."
+	@echo "Deleting ~/.brewconfig.zsh file..."
+	@rm -f ~/.brewconfig.zsh
+	@echo "~/.brewconfig.zsh file deleted."
+endif
 
-spin:
-	@$(REMOVE) $(SPIN_FILE)
-	@echo "$(BOLD)$(PURPLE)Starting a long running task...$(RESET)"
-	@chmod +x $(SPIN_SH)
-	@$(SPIN_SH) $(SPIN_MSG) $(SPIN_FILE) &
-	@$(PROCESS)
-	@touch $(SPIN_FILE)
-	@sleep 0.2
-	@printf "$(UP)$(ERASE_LINE)"
-	@echo "$(BOLD)$(GREEN)Long-running task completed.$(RESET)"
-	@$(MAKE) spin2 $(NPD)
-	@echo "$(BOLD)$(PURPLE)Both 'spin' and 'spin2' are finished$(RESET)"
+brew_info:
+	@open "https://docs.brew.sh/"
+# **************************************************************************** # CMake
+CHECK_BREW := $(shell command -v brew 2> /dev/null)
+CHECK_CMAKE := $(shell command -v cmake 2> /dev/null)
 
+# Estimated time (based on when i installed it on my session)
+ESTIMATED_TIME = "$(BOLD)7 min 15 seconds$(RESET)"
 
-# This part is a test to simulate a second nested process
-SPIN_MSG2	:= "Simulating something else for three seconds..."
-PROCESS2	:= sleep 3
+cmake:
+ifndef CHECK_BREW
+	@echo "Brew is needed to install CMake... run 'make brew' first."
+else
+  ifndef CHECK_CMAKE
+	@echo "Installing CMake...this might take around $(ESTIMATED_TIME)..."
+	@brew install cmake
+  else
+	@echo "CMake is already installed."
+  endif
+endif
+# **************************************************************************** # GLFW
+CHECK_GLFW := $(shell command -v glfw 2> /dev/null)
 
-spin2:
-	@$(REMOVE) $(SPIN_FILE)
-	@echo "$(BOLD)$(PURPLE)Starting a shorter running task...$(RESET)"
-	@$(SPIN_SH) $(SPIN_MSG2) $(SPIN_FILE) &
-	@$(PROCESS2)
-	@touch $(SPIN_FILE)
-	@sleep 0.2
-	@printf "$(UP)$(ERASE_LINE)"
-	@echo "$(BOLD)$(GREEN)shorter task completed.$(RESET)"
+# Estimated time (based on when i installed it on my session)
+ESTIMATED_TIME = "$(BOLD)10 seconds$(RESET)"
 
-.PHONY: spin spin2
+glfw:
+ifndef CHECK_BREW
+	@echo "Brew is needed to install GLFW... run 'make brew' first."
+else
+  ifndef CHECK_GLFW
+	@echo "Installing GLFW...this might take around $(ESTIMATED_TIME)"
+	@brew install glfw
+  else
+	@echo "GLFW is already installed."
+  endif
+endif
 
-# **************************************************************************** #
-# ----------------------------------- CUBE ----------------------------------- #
-# **************************************************************************** #
-# https://www.asciiart.eu/art-and-design/geometries
-
-define HASH_CUBE
-      #########.
-     ########",#:
-   #########',##".
-  ##'##'## .##',##.
-   ## ## ## # ##",#.
-    ## ## ## ## ##'
-     ## ## ## :##
-      ## ## ##."
-endef
-export HASH_CUBE
-
-
-
-define ALL_FRAMES
-+------+.      +------+       +------+       +------+      .+------+
-|`.    | `.    |\     |\      |      |      /|     /|    .' |    .'|
-|  `+--+---+   | +----+-+     +------+     +-+----+ |   +---+--+'  |
-|   |  |   |   | |    | |     |      |     | |    | |   |   |  |   |
-+---+--+.  |   +-+----+ |     +------+     | +----+-+   |  .+--+---+
- `. |    `.|    \|     \|     |      |     |/     |/    |.'    | .'
-   `+------+     +------+     +------+     +------+     +------+'
-   .+------+     +------+     +------+     +------+     +------+.
- .' |    .'|    /|     /|     |      |     |\     |\    |`.    | `.
-+---+--+'  |   +-+----+ |     +------+     | +----+-+   |  `+--+---+
-|   |  |   |   | |    | |     |      |     | |    | |   |   |  |   |
-|  ,+--+---+   | +----+-+     +------+     +-+----+ |   +---+--+   |
-|.'    | .'    |/     |/      |      |      \|     \|    `. |   `. |
-+------+'      +------+       +------+       +------+      `+------+
-endef
-export ALL_FRAMES
-
-# Frames
-define CUBE_FRAME_1
-+------+.
-|`.    | `.
-|  `+--+---+
-|   |  |   |
-+---+--+.  |
- `. |    `.|
-   `+------+
-endef
-export CUBE_FRAME_1
-
-define CUBE_FRAME_2
-+------+
-|\\     |\\
-| +----+-+
-| |    | |
-+-+----+ |
- \\|     \\|
- +------+
-endef
-export CUBE_FRAME_2
-
-define CUBE_FRAME_3
-+------+
-|      |
-+------+
-|      |
-+------+
-|      |
-+------+
-endef
-export CUBE_FRAME_3
-
-define CUBE_FRAME_4
-  +------+ 
- /|     /| 
-+-+----+ | 
-| |    | | 
-| +----+-+ 
-|/     |/  
-+------+   
-endef
-export CUBE_FRAME_4
-
-define CUBE_FRAME_5
-   .+------+
- .' |    .'|
-+---+--+'  |
-|   |  |   |
-|  .+--+---+
-|.'    | .'
-+------+'
-endef
-export CUBE_FRAME_5
-
-define CUBE_FRAME_6
-   .+------+
- .' |    .'|
-+---+--+'  |
-|   |  |   |
-|  ,+--+---+
-|.'    | .'
-+------+'
-endef
-export CUBE_FRAME_6
-
-define CUBE_FRAME_7
-  +------+ 
- /|     /| 
-+-+----+ | 
-| |    | | 
-| +----+-+ 
-|/     |/  
-+------+   
-endef
-export CUBE_FRAME_7
-
-define CUBE_FRAME_8
-+------+ 
-|      | 
-+------+ 
-|      | 
-+------+ 
-|      | 
-+------+ 
-endef
-export CUBE_FRAME_8
-
-define CUBE_FRAME_9
-+------+   
-|\\     |\\  
-| +----+-+ 
-| |    | | 
-+-+----+ | 
- \\|     \\| 
-  +------+ 
-endef
-export CUBE_FRAME_9
-
-define CUBE_FRAME_10
-+------+.
-|`.    | `.
-|  `+--+---+
-|   |  |   |
-+---+--+   |
- `. |   `. |
-   `+------+
-endef
-export CUBE_FRAME_10
-
-# Animation test
-cube:
-	@clear
-	@for i in 1 2 3 4 5 10 9 8 7 6 1 2 3; do \
-		case $$i in \
-		1) echo "$$CUBE_FRAME_1";;\
-		2) echo "$$CUBE_FRAME_2";;\
-		3) echo "$$CUBE_FRAME_3";;\
-		4) echo "$$CUBE_FRAME_4";;\
-		5) echo "$$CUBE_FRAME_5";;\
-		6) echo "$$CUBE_FRAME_6";;\
-		7) echo "$$CUBE_FRAME_7";;\
-		8) echo "$$CUBE_FRAME_8";;\
-		9) echo "$$CUBE_FRAME_9";;\
-		10) echo "$$CUBE_FRAME_10";;\
-		esac; \
-		sleep 0.1; \
-		clear; \
-	done
-	@echo "need to stabilize the location of the cubes in each frame *!!"
-
-.PHONY: cube
-
+.PHONY: brew delete_brew brew_info cmake glfw

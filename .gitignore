@@ -23,4 +23,10 @@
 .testfile
 
 # Executables
-cub3D
+placeholder
+
+# MLX42
+lib/MLX42/build/
+
+# libft
+lib/libft/libft.a

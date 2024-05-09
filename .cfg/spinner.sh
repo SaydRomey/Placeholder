@@ -1,5 +1,39 @@
 #!/bin/bash
 
+# spin()
+# {
+# 	case $(( $1 % 10 )) in
+# 		0) echo -n "⠁" ;;
+# 		1) echo -n "⠃" ;;
+# 		2) echo -n "⠇" ;;
+# 		3) echo -n "⠧" ;;
+# 		4) echo -n "⠷" ;;
+# 		5) echo -n "⠿" ;;
+# 		6) echo -n "⠷" ;;
+# 		7) echo -n "⠧" ;;
+# 		8) echo -n "⠇" ;;
+# 		9) echo -n "⠃" ;;
+# 	esac
+# }
+
+# start_spinner_until_file_exists()
+# {
+# 	local message="$1"
+# 	local file="$2"
+# 	local delay=0.1
+# 	local spinpos=0
+# 	echo -n "$message "
+# 	while [ ! -f "$file" ]; do
+# 		echo -ne "\r$(spin $spinpos) $message"
+# 		spinpos=$((spinpos+1))
+# 		sleep $delay
+# 	done
+# 	echo -e "\r$message Done."
+# }
+
+# start_spinner_until_file_exists "$@"
+
+
 # # # # # # #
 # with predefined colors
 
@@ -104,40 +138,3 @@ start_spinner_until_file_exists "$@"
 # 	@echo "Long-running task completed."
 
 # .PHONY: spin
-
-
-# # # # # # #
-# simple version (no colors)
-
-# spin()
-# {
-# 	case $(( $1 % 10 )) in
-# 		0) echo -n "⠁" ;;
-# 		1) echo -n "⠃" ;;
-# 		2) echo -n "⠇" ;;
-# 		3) echo -n "⠧" ;;
-# 		4) echo -n "⠷" ;;
-# 		5) echo -n "⠿" ;;
-# 		6) echo -n "⠷" ;;
-# 		7) echo -n "⠧" ;;
-# 		8) echo -n "⠇" ;;
-# 		9) echo -n "⠃" ;;
-# 	esac
-# }
-
-# start_spinner_until_file_exists()
-# {
-# 	local message="$1"
-# 	local file="$2"
-# 	local delay=0.1
-# 	local spinpos=0
-# 	echo -n "$message "
-# 	while [ ! -f "$file" ]; do
-# 		echo -ne "\r$(spin $spinpos) $message"
-# 		spinpos=$((spinpos+1))
-# 		sleep $delay
-# 	done
-# 	echo -e "\r$message Done."
-# }
-
-# start_spinner_until_file_exists "$@"

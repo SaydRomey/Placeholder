@@ -1,9 +1,0 @@
-[submodule "lib/libft"]
-	path = lib/libft
-	url = git@github.com:SaydRomey/libft.git
-[submodule "lib/minilibx"]
-	path = lib/minilibx
-	url = https://github.com/SaydRomey/minilibx
-[submodule "lib/MLX42"]
-	path = lib/MLX42
-	url = https://github.com/codam-coding-college/MLX42
