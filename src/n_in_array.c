@@ -1,43 +1,37 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   main.c                                             :+:      :+:    :+:   */
+/*   n_in_array.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: cdumais <cdumais@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/11/20 22:08:14 by cdumais           #+#    #+#             */
-/*   Updated: 2024/05/09 20:20:19 by cdumais          ###   ########.fr       */
+/*   Created: 2024/05/09 19:59:57 by cdumais           #+#    #+#             */
+/*   Updated: 2024/05/09 20:00:14 by cdumais          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "placeholder.h"
 
-void	ft_testing(void);
-
-int		main(int argc, char **argv, char **envp)
+int	n_in_array(int **array, int width, int height, int value_to_find)
 {
-	(void)argc;
-	(void)argv;
-
-	ft_testing();
-	// 
-	ft_printf("Operating system: ");
-	ft_uname(envp);
-	// 
-	// test_toggle();
-	// 
-	print_salary_estimate(20.5f);
-	// 
-	return (0);
-}
-
-
-
-
-
-
-
-void	ft_testing(void)
-{
-	_here(__FILE__, __LINE__);
+	int	y;
+	int	x;
+	int	count;
+	
+	count = 0;
+	y = 0;
+	while (y < height)
+	{
+		x = 0;
+		while (x < width)
+		{
+			if (array[y][x] == value_to_find)
+			{
+				count++;
+			}
+			x++;
+		}
+		y++;
+	}
+	return (count);
 }

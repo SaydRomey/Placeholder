@@ -1,43 +1,31 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   main.c                                             :+:      :+:    :+:   */
+/*   line_dda.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: cdumais <cdumais@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/11/20 22:08:14 by cdumais           #+#    #+#             */
-/*   Updated: 2024/05/09 20:20:19 by cdumais          ###   ########.fr       */
+/*   Created: 2024/05/09 20:12:31 by cdumais           #+#    #+#             */
+/*   Updated: 2024/05/09 20:12:51 by cdumais          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "placeholder.h"
 
-void	ft_testing(void);
-
-int		main(int argc, char **argv, char **envp)
+void	draw_line(mlx_image_t *img, t_fpoint start, t_fpoint end, int color)
 {
-	(void)argc;
-	(void)argv;
+	t_fpoint	step;
+	int			max;
 
-	ft_testing();
-	// 
-	ft_printf("Operating system: ");
-	ft_uname(envp);
-	// 
-	// test_toggle();
-	// 
-	print_salary_estimate(20.5f);
-	// 
-	return (0);
-}
-
-
-
-
-
-
-
-void	ft_testing(void)
-{
-	_here(__FILE__, __LINE__);
+	step.x = end.x - start.x;
+	step.y = end.y - start.y;
+	max = ft_max(ft_abs(step.x), ft_abs(step.y));
+	step.x /= max;
+	step.y /= max;
+	while ((int)(start.x - end.x) || (int)(start.y - end.y))
+	{
+		draw_pixel(img, start.x, start.y, color);
+		start.x += step.x;
+		start.y += step.y;
+	}
 }
