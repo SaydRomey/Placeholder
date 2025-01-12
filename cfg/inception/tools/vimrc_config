@@ -1,0 +1,38 @@
+" Enable mouse (might not work without UI)
+set mouse=a
+
+" Enable syntax highlighting
+syntax on
+
+" Line numbers
+" set number            " Enable line numbers
+" set numberwidth=2     " Change gutter column width for numbers
+" set cpoptions+=n      " Text wrapping for line numbers
+
+" Toggle comment for the current line or selected lines with CTRL+/
+nnoremap <C-/> I# <Esc>^
+vnoremap <C-/> :s/^#\?/#/<CR>
+
+" General tab and indentation settings (default settings)
+set tabstop=4       " Number of spaces that a <Tab> counts for
+set shiftwidth=4    " Number of spaces to use for autoindent
+set autoindent      " Automatically indent the next line
+set expandtab       " Convert tabs to spaces
+
+" Enable filetype detection and plugins
+filetype plugin indent on
+
+" Filetype-specific settings
+
+" YAML settings (.yml files, e.g., docker-compose.yml)
+autocmd FileType yaml setlocal tabstop=2 shiftwidth=2 expandtab
+" autocmd FileType yaml setlocal noautoindent " Disable autoindent
+autocmd FileType yaml setlocal indentexpr=  " Avoid extra indentation on Enter
+
+" Makefile settings (Makefiles should use tabs, not spaces)
+autocmd FileType make setlocal noexpandtab
+
+" C and C++ settings (use 4-space tabs instead of spaces)
+autocmd FileType c,cpp setlocal noexpandtab tabstop=4 shiftwidth=4
+
+
